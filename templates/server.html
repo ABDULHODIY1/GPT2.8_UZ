@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Maga Server</title>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Server App For dispatcher</h1>
+    <div id="map"></div>
+    <!--//<br><a href='{% url 'location-list' %}'>API Get Post </a>-->
+    <script
+      src="https://api-maps.yandex.ru/2.1/?apikey=42f74753-1f3a-4018-bcd9-bce1fd7dea21&lang=en_US"
+      type="text/javascript"
+    ></script>
+    <script>
+      ymaps.ready(init);
+
+      function init() {
+        let map = new ymaps.Map("map", {
+          center: [55.7558, 37.6176], // Default center
+          zoom: 12,
+          type: "yandex#hybrid",
+        });
+        //////////////////////////////////////////
+        // Fetch data from your Django API
+
+        fetch("https://abdulhodiy3000.pythonanywhere.com/api/locations/", {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Data from the API
+            var locationData = data[data.length - 1]; // Change this based on your API response structure
+
+            map.setCenter([locationData.latitude, locationData.longitude]);
+            // Get address using Yandex Geocoder
+
+            let marker = new ymaps.Placemark(
+              [locationData.latitude, locationData.longitude],
+              {
+                hintContent: "Users location",
+                balloonContent: "Users location!",
+              }
+            );
+
+            map.geoObjects.add(marker);
+
+            ymaps
+              .geocode([locationData.latitude, locationData.longitude])
+              .then(function (result) {
+                var address = result.geoObjects.get(0).getAddressLine();
+                console.log("Address:", address);
+
+                // Display the address on the page
+                document
+                  .getElementById("map")
+                  .insertAdjacentHTML(
+                    "beforeend",
+                    "<p>Address: " + address + "</p>"
+                  );
+              });
+          });
+
+        //////////////////////////////////////////
+
+        // // Get current user's location
+        // if ("geolocation" in navigator) {
+        //   navigator.geolocation.getCurrentPosition(function (position) {
+        //     var latitude = position.coords.latitude;
+        //     var longitude = position.coords.longitude;
+        //     //<!--                    //map.setCenter([latitude, longitude]);-->
+
+        //     // Add a marker to the map
+        //     var marker = new ymaps.Placemark([latitude, longitude], {
+        //       hintContent: "Your Location",
+        //       balloonContent: "You are here!",
+        //     });
+
+        //     map.geoObjects.add(marker);
+        //   });
+        // } else {
+        //   console.log("Geolocation is not available in this browser.");
+        // }
+      }
+    </script>
+    <style>
+      /* .ymaps-2-1-79-float-button.ymaps-2-1-79-_hidden-text{
+
+        } */
+
+      .ymaps-2-1-79-controls__control_toolbar.ymaps-2-1-79-user-selection-none {
+        background: linear-gradient(60deg, orange, yellow, white);
+      }
+      .ymaps-2-1-79-float-button.ymaps-2-1-79-_hidden-text {
+        background: linear-gradient(60deg, orange, yellow, white);
+        color: black;
+      }
+      .ymaps-2-1-79-gotoymaps__container {
+        background: linear-gradient(60deg, orange, yellow, white);
+        color: black;
+      }
+      .ymaps-2-1-79-listbox__button.ymaps-2-1-79-_hidden-text.ymaps-2-1-79-user-selection-none {
+        background: linear-gradient(60deg, orange, yellow, white);
+      }
+    </style>
